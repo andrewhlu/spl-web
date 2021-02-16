@@ -1,0 +1,10 @@
+{
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.factorypath": true,
+        "**/.next": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/node_modules": true
+    }
+}

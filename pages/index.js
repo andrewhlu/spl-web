@@ -1,65 +1,81 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { Box, Button, HStack, Image, Spacer, Tooltip } from "@chakra-ui/react";
+import { useState } from 'react';
+import { MapInteractionCSS } from 'react-map-interaction';
+import absoluteUrl from 'next-absolute-url';
+import { fetch } from "../utils/fetch.js";
+import LeftBar from "../components/LeftBar.js";
+import NavItem from "../components/NavItem.js";
+import styles from '../styles/Home.module.css';
 
-export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+export async function getServerSideProps(context) {
+    const { origin } = absoluteUrl(context.req, 'localhost:3000');
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+    const settings = await fetch(`${origin}/api/settings`);
+    const status = await fetch(`${origin}/api/status`);
+    const devices = await fetch(`${origin}/api/devices`);
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+    return {
+        props: {
+            query: context.query,
+            settings: settings,
+            status: status,
+            devices: devices
+        }
+    }
+}
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+export default function Home(props) {
+    const [selectedSpot, setSelectedSpot] = useState("");
+    
+    const navbarHeight = "4rem";
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+    const getStatus = (id) => {
+        const statuses = props.status.filter(s => s.device_id === id);
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
+        // Currently only returns the first element, but it should return the most recent
+        return statuses.length > 0 ? statuses[0].raw === "true" : null;
+    }
 
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+    const generateMapIndicator = (spot) => {
+        const status = getStatus(spot.id);
+        const color = status !== null ? status === true ? "red" : "teal" : "gray";
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+        return (
+            <Tooltip hasArrow label={spot.id} closeOnClick={false} key={spot.id}>
+                <Button colorScheme={color}
+                    variant="solid" 
+                    width="50px" 
+                    height="50px" 
+                    border="3px solid black" 
+                    borderRadius="25px" 
+                    className={styles.mapDivItem} 
+                    top={`${spot.position[1] - 25}px`} 
+                    left={`${spot.position[0] - 25}px`}
+                    onClick={() => {setSelectedSpot(spot.id)}}></Button>
+            </Tooltip>
+        )
+    }
+
+    return (
+        <Box height="100vh">
+            <Box bg="#333333" width="100vw" height={navbarHeight}>
+                <HStack className={styles.navLink} style={{margin: "0 1.5rem"}}>
+                    <NavItem height={navbarHeight} content="Smart Parking Lot"></NavItem>
+                    <Spacer></Spacer>
+                    <Button colorScheme="teal" variant="solid" disabled>Login</Button>
+                </HStack>
+            </Box>
+
+            <Box width="100%" height={`calc(100vh - ${navbarHeight})`} bg="#dae6e6">
+                <MapInteractionCSS>
+                    <Image src={props.settings.floorplan} alt="Parking Lot" className={styles.mapDivItem}></Image>
+                    {props.settings.spots.map(spot => generateMapIndicator(spot))}
+                </MapInteractionCSS>
+            </Box>
+
+            <Box width="20%" height="50%" className={styles.leftBarPos}>
+                <LeftBar settings={props.settings} status={props.status} devices={props.devices} selectedSpot={selectedSpot}></LeftBar>
+            </Box>
+        </Box>
+    )
 }

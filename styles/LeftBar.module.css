@@ -1,0 +1,19 @@
+.leftBar {
+    margin: 2rem;
+    border: 5px solid #9cbebe;
+    border-radius: 2rem;
+}
+
+.leftBar h1 {
+    /* font-weight: bold; */
+    font-size: 2rem;
+    text-align: center;
+}
+
+.contPadding {
+    padding: 1rem;
+}
+
+.bold {
+    font-weight: bold;
+}
