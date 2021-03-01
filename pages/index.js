@@ -26,6 +26,7 @@ export async function getServerSideProps(context) {
 
 export default function Home(props) {
     const [selectedSpot, setSelectedSpot] = useState("");
+    const [collapsed, setCollapsed] = useState(false);
     
     const navbarHeight = "4rem";
 
@@ -73,8 +74,18 @@ export default function Home(props) {
                 </MapInteractionCSS>
             </Box>
 
-            <Box width="20%" height="50%" className={styles.leftBarPos}>
-                <LeftBar settings={props.settings} status={props.status} devices={props.devices} selectedSpot={selectedSpot}></LeftBar>
+            <Box w={{ base: "100%", lg: "500px"}} 
+                maxH={{ base: "40%", lg: "800px" }}
+                pos="fixed"
+                top={{ lg: "4rem"}} 
+                bottom={{ base: "0"}}
+                p={{ base: "0", lg: "2rem" }}>
+                <LeftBar settings={props.settings} 
+                    status={props.status} 
+                    devices={props.devices} 
+                    selectedSpot={selectedSpot}
+                    collapsed={collapsed}
+                    setCollapsed={setCollapsed}></LeftBar>
             </Box>
         </Box>
     )
