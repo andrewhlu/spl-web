@@ -18,6 +18,12 @@ function MyApp({ Component, pageProps }) {
 
                 <meta name="mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
+
+                <link
+                    rel="apple-touch-startup-image"
+                    media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+                    href="/splash_2436x1125.png"
+                />
             </Head>
             
             <ChakraProvider>
