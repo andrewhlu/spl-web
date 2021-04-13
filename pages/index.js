@@ -1,6 +1,6 @@
 import { Box, Button, HStack, Image, Spacer, Tooltip } from "@chakra-ui/react";
 import { useState } from 'react';
-import { MapInteractionCSS } from 'react-map-interaction';
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import absoluteUrl from 'next-absolute-url';
 import { fetch } from "../utils/fetch.js";
 import LeftBar from "../components/LeftBar.js";
@@ -9,6 +9,7 @@ import styles from '../styles/Home.module.css';
 
 export async function getServerSideProps(context) {
     const { origin } = absoluteUrl(context.req, 'localhost:3000');
+    // const origin = "http://10.0.0.93:3000";
 
     const settings = await fetch(`${origin}/api/settings`);
     const status = await fetch(`${origin}/api/status`);
@@ -52,7 +53,12 @@ export default function Home(props) {
                     className={styles.mapDivItem} 
                     top={`${spot.position[1] - 25}px`} 
                     left={`${spot.position[0] - 25}px`}
-                    onClick={() => {setSelectedSpot(spot.id)}}></Button>
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                        console.log(`${spot.id} has been clicked`);
+                        setSelectedSpot(spot.id);
+                        setCollapsed(false);
+                    }}></Button>
             </Tooltip>
         )
     }
@@ -61,17 +67,31 @@ export default function Home(props) {
         <Box height="100vh">
             <Box bg="#333333" width="100vw" height={navbarHeight}>
                 <HStack className={styles.navLink} style={{margin: "0 1.5rem"}}>
-                    <NavItem height={navbarHeight} content="Smart Parking Lot"></NavItem>
+                    <NavItem height={navbarHeight} content="Parkingbase"></NavItem>
                     <Spacer></Spacer>
                     <Button colorScheme="teal" variant="solid" disabled>Login</Button>
                 </HStack>
             </Box>
 
             <Box width="100%" height={`calc(100vh - ${navbarHeight})`} bg="#dae6e6">
-                <MapInteractionCSS>
-                    <Image src={props.settings.floorplan} alt="Parking Lot" className={styles.mapDivItem}></Image>
-                    {props.settings.spots.map(spot => generateMapIndicator(spot))}
-                </MapInteractionCSS>
+                <TransformWrapper
+                    defaultScale={0.3}
+                    options={{
+                        limitToBounds: false,
+                        minScale: 0.15,
+                        maxScale: 3
+                    }}
+                    wheel={{
+                        step: 250
+                    }}
+                >
+                    <TransformComponent>
+                        <Box width="100vw" height={`calc(100vh - ${navbarHeight})`} bg="#dae6e6">
+                            <Image src={props.settings.floorplan} alt="Parking Lot" className={styles.mapDivItem}></Image>
+                            {props.settings.spots.map(spot => generateMapIndicator(spot))}
+                        </Box>
+                    </TransformComponent>
+                </TransformWrapper>
             </Box>
 
             <Box w={{ base: "100%", lg: "500px"}} 

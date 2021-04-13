@@ -18,6 +18,7 @@
     "next-absolute-url": "^1.2.2",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "react-map-interaction": "^2.0.0"
+    "react-map-interaction": "^2.0.0",
+    "react-zoom-pan-pinch": "^1.6.1"
   }
 }
