@@ -67,7 +67,10 @@ export default function Home(props) {
         <Box height="100vh">
             <Box bg="#333333" width="100vw" height={navbarHeight}>
                 <HStack className={styles.navLink} style={{margin: "0 1.5rem"}}>
-                    <NavItem height={navbarHeight} content="Parkingbase"></NavItem>
+                    <Image src="/p-marker.png" alt="Parkingbase Logo" h="3rem"></Image>
+                    <Box visibility={{base: "hidden", lg: "visible"}}>
+                        <NavItem height={navbarHeight} content="Parkingbase"></NavItem>
+                    </Box>
                     <Spacer></Spacer>
                     <Button colorScheme="teal" variant="solid" disabled>Login</Button>
                 </HStack>
