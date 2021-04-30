@@ -1,6 +1,8 @@
 import { createCanvas, loadImage, registerFont } from "canvas";
 import path from "path";
 import getConfig from "next/config";
+import { promises as fs } from "fs";
+import { fetchBuffer } from "../../../utils/fetch";
 
 const { serverRuntimeConfig } = getConfig();
 
@@ -21,7 +23,13 @@ export default async function(req, res) {
         return res.status(400).end();
     }
 
-    registerFont(getFullImageURL("fonts/AvenirLTStd-Light.otf"), { family: "Avenir" });
+    if (process.env.VERCEL === "1") {
+        const fontBuf = await fetchBuffer(getFullImageURL("fonts/AvenirLTStd-Light.otf"));
+        await fs.writeFile("AvenirLTStd-Light.otf", fontBuf);
+        registerFont("AvenirLTStd-Light.otf", { family: "Avenir" });
+    } else {
+        registerFont("public/fonts/AvenirLTStd-Light.otf", { family: "Avenir" });
+    }
 
     const canvas = createCanvas(width, height);
     const context = canvas.getContext("2d");
