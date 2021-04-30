@@ -1,4 +1,4 @@
-import { createCanvas, loadImage } from "canvas";
+import { createCanvas, loadImage, registerFont } from "canvas";
 import path from "path";
 import getConfig from "next/config";
 
@@ -20,6 +20,8 @@ export default async function(req, res) {
     if (isNaN(height) || isNaN(width)) {
         return res.status(400).end();
     }
+
+    registerFont(getFullImageURL("fonts/AvenirLTStd-Light.otf"), { family: "Avenir" });
 
     const canvas = createCanvas(width, height);
     const context = canvas.getContext("2d");
@@ -46,7 +48,7 @@ export default async function(req, res) {
     if (currentBranch !== "main") {
         const fontSize = Math.floor((isVertical ? height : width) * 0.02);
 
-        context.font = `${fontSize}pt sans-serif`;
+        context.font = `${fontSize}pt Avenir`;
         context.textAlign = "center";
 
         context.fillStyle = "#FEBC11";
