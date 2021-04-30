@@ -25,8 +25,8 @@ export default async function(req, res) {
 
     if (process.env.VERCEL === "1") {
         const fontBuf = await fetchBuffer(getFullImageURL("fonts/AvenirLTStd-Light.otf"));
-        await fs.writeFile("AvenirLTStd-Light.otf", fontBuf);
-        registerFont("AvenirLTStd-Light.otf", { family: "Avenir" });
+        await fs.writeFile("/tmp/AvenirLTStd-Light.otf", fontBuf);
+        registerFont("/tmp/AvenirLTStd-Light.otf", { family: "Avenir" });
     } else {
         registerFont("public/fonts/AvenirLTStd-Light.otf", { family: "Avenir" });
     }
