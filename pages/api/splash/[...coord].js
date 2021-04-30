@@ -17,7 +17,7 @@ export default async function(req, res) {
 
     const currentBranch = process.env.VERCEL_GIT_COMMIT_REF;
     const currentCommit = process.env.VERCEL_GIT_COMMIT_SHA;
-    const isVercel = process.env.VERCEL === 1;
+    const isVercel = process.env.VERCEL === "1";
 
     console.log("Height:", height, "Width:", width, "Vertical:", isVertical, "Vercel:", isVercel, "Current Branch:", currentBranch);
 
