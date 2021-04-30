@@ -10,7 +10,8 @@ const { serverRuntimeConfig } = getConfig();
 // https://flaviocopes.com/canvas-node-generate-image/
 
 export default async function(req, res) {
-    const { coord: [qHeight, qWidth] } = req.query;
+    // Pass in width then height
+    const { coord: [qWidth, qHeight] } = req.query;
     const height = parseInt(qHeight);
     const width = parseInt(qWidth);
     const isVertical = height > width;
