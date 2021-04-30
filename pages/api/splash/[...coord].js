@@ -13,7 +13,6 @@ export default async function(req, res) {
     const width = parseInt(qWidth);
     const isVertical = height > width;
 
-    const projectRoot = serverRuntimeConfig.PROJECT_ROOT;
     const currentBranch = serverRuntimeConfig.GIT_BRANCH;
 
     console.log("Height:", height, "Width:", width, "Vertical:", isVertical, "Current Branch:", currentBranch);
@@ -31,14 +30,14 @@ export default async function(req, res) {
 
     // Logo and app name
     if (isVertical) {
-        const logo = await loadImage(path.join(projectRoot, "./public/marker.png"));
-        const pbText = await loadImage(path.join(projectRoot, "./public/parkingbase.png"));
+        const logo = await loadImage(getFullImageURL("marker.png"));
+        const pbText = await loadImage(getFullImageURL("parkingbase.png"));
     
         const logoWidth = Math.floor(width / 2);
         context.drawImage(logo, Math.floor(width / 2 - logoWidth / 2), Math.floor(height * 0.4 - logoWidth / 2), logoWidth, logoWidth);
         context.drawImage(pbText, 0, Math.floor(height * 0.4 - logoWidth / 2 + logoWidth), width, width * 1094 / 3810);
     } else {
-        const logo = await loadImage(path.join(projectRoot, "./public/logo.png"));
+        const logo = await loadImage(getFullImageURL("logo.png"));
 
         context.drawImage(logo, Math.floor(width / 4), Math.floor(height * 0.3), Math.floor(width / 2), Math.floor(width / 2 * 1291 / 3794));
     }
@@ -60,4 +59,13 @@ export default async function(req, res) {
     const buffer = canvas.toBuffer("image/png");
     res.setHeader("Content-Type", "image/png");
     res.status(200).send(buffer);
+}
+
+function getFullImageURL(filename) {
+    console.log("Vercel:", process.env.VERCEL)
+    if (process.env.VERCEL === "1") {
+        return `https://${process.env.VERCEL_URL}/${filename}`;
+    } else {
+        return path.join(serverRuntimeConfig.PROJECT_ROOT, `./public/${filename}`)
+    }
 }
