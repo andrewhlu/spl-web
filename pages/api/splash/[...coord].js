@@ -15,15 +15,17 @@ export default async function(req, res) {
     const width = parseInt(qWidth);
     const isVertical = height > width;
 
-    const currentBranch = serverRuntimeConfig.GIT_BRANCH;
+    const currentBranch = process.env.VERCEL_GIT_COMMIT_REF;
+    const currentCommit = process.env.VERCEL_GIT_COMMIT_SHA;
+    const isVercel = process.env.VERCEL === 1;
 
-    console.log("Height:", height, "Width:", width, "Vertical:", isVertical, "Current Branch:", currentBranch);
+    console.log("Height:", height, "Width:", width, "Vertical:", isVertical, "Vercel:", isVercel, "Current Branch:", currentBranch);
 
     if (isNaN(height) || isNaN(width)) {
         return res.status(400).end();
     }
 
-    if (process.env.VERCEL === "1") {
+    if (isVercel) {
         const fontBuf = await fetchBuffer(getFullImageURL("fonts/AvenirLTStd-Light.otf"));
         await fs.writeFile("/tmp/AvenirLTStd-Light.otf", fontBuf);
         registerFont("/tmp/AvenirLTStd-Light.otf", { family: "Avenir" });
@@ -63,7 +65,8 @@ export default async function(req, res) {
         context.fillText("Development Build", width / 2, height * 0.8);
         
         context.fillStyle = "#3D4952";
-        context.fillText(currentBranch, width / 2, height * 0.8 + fontSize * 1.5);
+        context.fillText(isVercel ? currentBranch : "Local Debug", width / 2, height * 0.8 + fontSize * 1.5);
+        context.fillText(isVercel ? `Commit ${currentCommit.substring(0, 7)}` : "", width / 2, height * 0.8 + fontSize * 3);
     }
 
     const buffer = canvas.toBuffer("image/png");
@@ -72,10 +75,9 @@ export default async function(req, res) {
 }
 
 function getFullImageURL(filename) {
-    console.log("Vercel:", process.env.VERCEL)
     if (process.env.VERCEL === "1") {
         return `https://${process.env.VERCEL_URL}/${filename}`;
     } else {
-        return path.join(serverRuntimeConfig.PROJECT_ROOT, `./public/${filename}`)
+        return path.join(serverRuntimeConfig.PROJECT_ROOT, `./public/${filename}`);
     }
 }
