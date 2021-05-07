@@ -4,8 +4,6 @@ if (typeof window === "undefined") {
      */
     module.exports = {
         AUTH_DOMAIN: process.env.AUTH_DOMAIN,
-        GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
         MONGODB_URI: process.env.MONGODB_URI,
     };
 } else {
