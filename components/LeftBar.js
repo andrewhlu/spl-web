@@ -108,12 +108,12 @@ export default function LeftBar(props) {
                         <>
                             <Text>You are currently not parked in any spot.</Text>
                             <Button w="100%" my="0.5rem">Find me a spot!</Button>
-                            <Text>Handicapped? Show handicapped spots first by toggling the option in Settings.</Text>
+                            {/* <Text>Handicapped? Show handicapped spots first by toggling the option in Settings.</Text> */}
 
                             <Divider my="0.5rem" />
 
-                            <Heading size="sm" py="0.5rem">History</Heading>
-                            <Text>You have never parked in this parking lot.</Text>
+                            {/* <Heading size="sm" py="0.5rem">History</Heading>
+                            <Text>You have never parked in this parking lot.</Text> */}
                         </>
                     :
                         <>
