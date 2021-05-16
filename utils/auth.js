@@ -1,4 +1,4 @@
-import { initDatabase, serializeDocument } from "./mongodb";
+import { initDatabase } from "./mongodb";
 import crypto from 'crypto';
 
 export async function createAuth(session, redirectOrigin) {

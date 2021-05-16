@@ -1,9 +1,10 @@
 import { Button } from "@chakra-ui/button";
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
-import { Box, Container, Divider, Heading } from "@chakra-ui/layout";
+import { Image } from "@chakra-ui/image";
+import { Box, Container, Divider, Heading, HStack, Spacer, Text } from "@chakra-ui/layout";
 import { Menu, MenuItem, MenuList } from "@chakra-ui/menu";
 import { useRouter } from "next/router";
-import styles from '../styles/LeftBar.module.css';
+import User from "./User";
 
 export default function LeftBar(props) {
     const router = useRouter();
@@ -30,7 +31,54 @@ export default function LeftBar(props) {
             border="5px solid #9cbebe" 
             borderBottom={{base: "0", lg: "5px solid #9cbebe"}}
             borderRadius="2rem" 
-            borderBottomRadius={{base: "0", lg: "2rem"}}>
+            borderBottomRadius={{base: "0", lg: "2rem"}}
+        >
+            {/* Small screens (phone) */}
+            <Image
+                pos="fixed"
+                top="0.5rem"
+                left="0.5rem"
+                src="/marker-sm.png"
+                alt="Parkingbase Logo"
+                h="3rem"
+                d={{base: "inline", lg: "none"}}
+            />
+            <Box
+                
+            >
+                {props?.user ?
+                    <User user={props.user} mobile={true}/>
+                :
+                    <Button
+                        colorScheme="teal"
+                        variant="solid"
+                        onClick={props.onOpen}
+                        pos="fixed"
+                        top="0.5rem"
+                        right="0.5rem"
+                        d={{base: "inline", lg: "none"}}
+                    >Sign In</Button>
+                }
+            </Box>
+
+            {/* Large screens (computer) */}
+            <Box d={{base: "none", lg: "inline"}}>
+                <Box w="100%" px="1rem" py="0.5rem">
+                    <HStack>
+                        <Image src="/marker-sm.png" alt="Parkingbase Logo" h="3rem" />
+                        <Heading size="lg">Parkingbase</Heading>
+
+                        <Spacer />
+
+                        {props?.user &&
+                            <User user={props.user} />
+                        }
+                    </HStack>
+                </Box>
+
+                <Divider />
+            </Box>
+
             <Menu placement="bottom">
                 {/* This should be MenuButton */}
                 <Button
@@ -58,17 +106,18 @@ export default function LeftBar(props) {
 
                     {props.user ?
                         <>
-                            <p>You are currently not parked in any spot.</p>
+                            <Text>You are currently not parked in any spot.</Text>
                             <Button w="100%" my="0.5rem">Find me a spot!</Button>
+                            <Text>Handicapped? Show handicapped spots first by toggling the option in Settings.</Text>
 
                             <Divider my="0.5rem" />
 
                             <Heading size="sm" py="0.5rem">History</Heading>
-                            <p>You have never parked in this parking lot.</p>
+                            <Text>You have never parked in this parking lot.</Text>
                         </>
                     :
                         <>
-                            <p>Sign in to Parkingbase to reserve spots, keep track of your car's location, and more!</p>
+                            <Text>Sign in to Parkingbase to reserve spots, keep track of your car's location, and more!</Text>
 
                             <Box d={{base: "none", lg: "inline"}}>
                                 {/* Shows on large screens */}

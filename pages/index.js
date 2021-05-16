@@ -1,10 +1,13 @@
-import { Box, Button, HStack, Image, Spacer, Tooltip, useDisclosure } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/button";
+import { useDisclosure } from "@chakra-ui/hooks";
+import { Image } from "@chakra-ui/image";
+import { Box } from "@chakra-ui/layout";
+import { Tooltip } from "@chakra-ui/tooltip";
 import { useEffect, useState } from 'react';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import absoluteUrl from 'next-absolute-url';
 import { fetch } from "../utils/fetch.js";
 import LeftBar from "../components/LeftBar.js";
-import NavItem from "../components/NavItem.js";
 import styles from '../styles/Home.module.css';
 import { getSession } from "../utils/session";
 import LoginDrawer from "../components/LoginDrawer.js";
@@ -35,8 +38,6 @@ export default function Home(props) {
     const [collapsed, setCollapsed] = useState(false);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
-    
-    const navbarHeight = "4rem";
 
     const getStatus = (id) => {
         const statuses = props.status.filter(s => s.device_id === id);
@@ -57,7 +58,6 @@ export default function Home(props) {
                     height="50px" 
                     border="3px solid black" 
                     borderRadius="25px" 
-                    className={styles.mapDivItem} 
                     top={`${spot.position[1] - 25}px`} 
                     left={`${spot.position[0] - 25}px`}
                     style={{ cursor: "pointer" }}
@@ -73,28 +73,9 @@ export default function Home(props) {
     return (
         <>
             <LoginDrawer isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
+            
             <Box height="100vh">
-                <Box bg="#333333" width="100vw" height={navbarHeight}>
-                    <HStack className={styles.navLink} style={{margin: "0 1.5rem"}}>
-                        <Image src="/marker.png" alt="Parkingbase Logo" h="3rem"></Image>
-                        <Box visibility={{base: "hidden", lg: "visible"}}>
-                            <NavItem height={navbarHeight} content="Parkingbase"></NavItem>
-                        </Box>
-                        <Spacer></Spacer>
-                        {props.session?.user ?
-                            <Image
-                                borderRadius="full"
-                                boxSize={navbarHeight}
-                                src={props.session.user.picture}
-                                alt={props.session.user.fname}
-                            />
-                        :
-                            <Button colorScheme="teal" variant="solid" onClick={onOpen}>Sign In</Button>
-                        }
-                    </HStack>
-                </Box>
-
-                <Box width="100%" height={`calc(100vh - ${navbarHeight})`} bg="#dae6e6">
+                <Box width="100%" h="100vh" bg="#dae6e6">
                     <TransformWrapper
                         defaultScale={0.3}
                         options={{
@@ -107,7 +88,7 @@ export default function Home(props) {
                         }}
                     >
                         <TransformComponent>
-                            <Box width="100vw" height={`calc(100vh - ${navbarHeight})`} bg="#dae6e6">
+                            <Box w="100vw" h="100vh" bg="#dae6e6">
                                 <Image src={props.settings.floorplan} alt="Parking Lot" className={styles.mapDivItem}></Image>
                                 {props.settings.spots.map(spot => generateMapIndicator(spot))}
                             </Box>
@@ -115,10 +96,10 @@ export default function Home(props) {
                     </TransformWrapper>
                 </Box>
 
-                <Box w={{ base: "100%", lg: "500px"}} 
+                <Box w={{ base: "100%", lg: "550px"}} 
                     maxH={{ base: "40%", lg: "800px" }}
                     pos="fixed"
-                    top={{ lg: "4rem"}} 
+                    top={{ lg: "0"}} 
                     bottom={{ base: "0"}}
                     p={{ base: "0", lg: "2rem" }}>
                     <LeftBar settings={props.settings} 
