@@ -3,12 +3,11 @@ import { useDisclosure } from "@chakra-ui/hooks";
 import { Image } from "@chakra-ui/image";
 import { Box } from "@chakra-ui/layout";
 import { Tooltip } from "@chakra-ui/tooltip";
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import absoluteUrl from 'next-absolute-url';
 import { fetch } from "../utils/fetch.js";
 import LeftBar from "../components/LeftBar.js";
-import styles from '../styles/Home.module.css';
 import { getSession } from "../utils/session";
 import LoginDrawer from "../components/LoginDrawer.js";
 
@@ -36,8 +35,11 @@ export async function getServerSideProps(context) {
 export default function Home(props) {
     const [selectedSpot, setSelectedSpot] = useState("");
     const [collapsed, setCollapsed] = useState(false);
+    const [spots, setSpots] = useState(props.settings.spots);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const mapDiv = useRef(null);
 
     const getStatus = (id) => {
         const statuses = props.status.filter(s => s.device_id === id);
@@ -58,6 +60,7 @@ export default function Home(props) {
                     height="50px" 
                     border="3px solid black" 
                     borderRadius="25px" 
+                    pos="absolute"
                     top={`${spot.position[1] - 25}px`} 
                     left={`${spot.position[0] - 25}px`}
                     style={{ cursor: "pointer" }}
@@ -74,27 +77,32 @@ export default function Home(props) {
         <>
             <LoginDrawer isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
             
-            <Box height="100vh">
-                <Box width="100%" h="100vh" bg="#dae6e6">
-                    <TransformWrapper
-                        defaultScale={0.3}
-                        options={{
-                            limitToBounds: false,
-                            minScale: 0.15,
-                            maxScale: 3
-                        }}
-                        wheel={{
-                            step: 250
-                        }}
-                    >
-                        <TransformComponent>
-                            <Box w="100vw" h="100vh" bg="#dae6e6">
-                                <Image src={props.settings.floorplan} alt="Parking Lot" className={styles.mapDivItem}></Image>
-                                {props.settings.spots.map(spot => generateMapIndicator(spot))}
-                            </Box>
-                        </TransformComponent>
-                    </TransformWrapper>
-                </Box>
+            <Box height="100vh" bg="#dae6e6">
+                <TransformWrapper
+                    defaultScale={0.3}
+                    options={{
+                        limitToBounds: false,
+                        minScale: 0.15,
+                        maxScale: 3
+                    }}
+                    wheel={{
+                        step: 250
+                    }}
+                >
+                    <TransformComponent>
+                        <Box w="100vw" h="100vh" bg="#dae6e6">
+                            <Image
+                                ref={mapDiv}
+                                src={props.settings.floorplan}
+                                alt="Parking Lot"
+                                pos="absolute"
+                                maxW="none"
+                                style={{ pointerEvents: "auto !important" }}
+                            />
+                            {spots.map(spot => generateMapIndicator(spot))}
+                        </Box>
+                    </TransformComponent>
+                </TransformWrapper>
 
                 <Box w={{ base: "100%", lg: "550px"}} 
                     maxH={{ base: "40%", lg: "800px" }}

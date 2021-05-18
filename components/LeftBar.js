@@ -96,7 +96,7 @@ export default function LeftBar(props) {
                 </MenuList>
             </Menu>
             
-            <hr></hr>
+            <Divider />
 
             {!props.collapsed &&
                 <Container p="1rem">

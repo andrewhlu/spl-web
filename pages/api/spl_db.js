@@ -4,7 +4,7 @@ export default async function (req, res) {
     if (req.method !== "POST") {
         // This endpoint only accepts POST requests
         console.log("Method not allowed");
-        res.status(400).json({
+        return res.status(400).json({
             success: false,
             error: "Method not allowed"
         });

@@ -9,11 +9,11 @@ export default (req, res) => {
             },
             {
                 "id": "lora32_02",
-                "position": [435, 4584]
+                "position": [485, 4584]
             },
             {
                 "id": "lora32_03",
-                "position": [478, 4584]
+                "position": [575, 4584]
             }
         ]
     });
