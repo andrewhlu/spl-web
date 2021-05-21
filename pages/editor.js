@@ -13,11 +13,9 @@ export async function getServerSideProps(context) {
     const { origin } = absoluteUrl(context.req, 'localhost:3000');
     // const origin = "http://10.0.0.93:3000";
 
-    const settings = await fetch(`${origin}/api/settings`);
     const status = await fetch(`${origin}/api/status`);
 
     const session = await getSession(context.req, context.res);
-    console.log(session.user);
 
     if (!session.user?.admin) {
         // This user is not an admin, redirect to main page
@@ -33,7 +31,6 @@ export async function getServerSideProps(context) {
     return {
         props: {
             query: context.query,
-            settings: settings,
             status: status,
             session: session
         }
@@ -43,7 +40,7 @@ export async function getServerSideProps(context) {
 export default function Home(props) {
     const [currentLot, setCurrentLot] = useState(null);
     const [allLots, setAllLots] = useState([]);
-    const [spots, setSpots] = useState(props.settings.spots);
+    const [spots, setSpots] = useState([]);
 
     const mapDiv = useRef(null);
 
@@ -65,21 +62,41 @@ export default function Home(props) {
         return statuses.length > 0 ? statuses[0].raw === "true" : null;
     }
 
-    const removeSpot = (spot) => {
-        setSpots(spots.filter(s => s.id !== spot));
+    const removeSpot = async (spot) => {
+        const options = {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: spot._id
+            })
+        };
+
+        const lots = await fetch(`/api/spots/${currentLot._id}`, options);    
+        if (lots.success) {
+            setSpots(spots.filter(s => s.name !== spot.name));
+        }
     }
 
-    const selectLot = (id) => {
+    const selectLot = async (id) => {
         console.log(`Selecting lot ${id}`);
-        setCurrentLot(allLots.filter(lot => lot._id === id)[0]);
+        const lot = allLots.filter(lot => lot._id === id)[0]
+        setCurrentLot(lot);
+
+        // Get spots for current lot
+        const spotsResult = await fetch(`/api/spots/${lot._id}`);    
+        if (spotsResult.success) {
+            setSpots(spotsResult.spots);
+        }
     }
 
     const generateMapIndicator = (spot) => {
-        const status = getStatus(spot.id);
+        const status = getStatus(spot.name);
         const color = status !== null ? status === true ? "red" : "teal" : "gray";
 
         return (
-            <Tooltip hasArrow label={spot.id} closeOnClick={false} key={spot.id}>
+            <Tooltip hasArrow label={spot.name} closeOnClick={false} key={spot.name}>
                 <Button colorScheme={color}
                     variant="solid" 
                     width="50px" 
@@ -90,13 +107,13 @@ export default function Home(props) {
                     top={`${spot.position[1] - 25}px`} 
                     left={`${spot.position[0] - 25}px`}
                     style={{ cursor: "pointer" }}
-                    onClick={() => {removeSpot(spot.id)}}
+                    onClick={() => {removeSpot(spot)}}
                 ></Button>
             </Tooltip>
         )
     }
 
-    const addSpot = (e) => {
+    const addSpot = async (e) => {
         const mapRect = mapDiv.current.getBoundingClientRect();
 
         const mapCoord = {
@@ -124,10 +141,22 @@ export default function Home(props) {
             Math.floor((clickCoord.y - mapCoord.y) / mapDimensions.height * naturalDimensions.height)
         ];
 
-        setSpots(spots => [...spots, {
-            id: `new-${clickPosition[0]}-${clickPosition[1]}`,
-            position: clickPosition
-        }]);
+        const options = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: `new-${clickPosition[0]}-${clickPosition[1]}`,
+                x: clickPosition[0],
+                y: clickPosition[1]
+            })
+        };
+
+        const result = await fetch(`/api/spots/${currentLot._id}`, options);    
+        if (result.success) {
+            setSpots(spots => [...spots, result.spot]);
+        }
     }
 
     return (
@@ -165,8 +194,7 @@ export default function Home(props) {
                     top={{ lg: "0"}} 
                     bottom={{ base: "0"}}
                     p={{ base: "0", lg: "2rem" }}>
-                    <LeftBarEditor 
-                        settings={props.settings}
+                    <LeftBarEditor
                         status={props.status}
                         user={props.session?.user}
                         currentLot={currentLot}

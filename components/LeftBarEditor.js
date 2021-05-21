@@ -84,7 +84,7 @@ export default function LeftBarEditor(props) {
 
                 <VStack spacing="1rem">
                     {props.spots.map(spot => 
-                        <Button w="100%" key={spot.id} onClick={() => props.removeSpot(spot.id)}>{spot.id}</Button>
+                        <Button w="100%" key={spot.name} onClick={() => props.removeSpot(spot)}>{spot.name}</Button>
                     )}
                 </VStack>
             </Container>

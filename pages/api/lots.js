@@ -11,7 +11,6 @@ export default async function(req, res) {
     }
 
     const lots = await getLots();
-    console.log(lots);
 
     res.status(200).json({
         success: true,
