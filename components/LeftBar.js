@@ -9,8 +9,8 @@ import User from "./User";
 export default function LeftBar(props) {
     const router = useRouter();
 
-    const getStatus = (id) => {
-        const statuses = props.status.filter(s => s.device_id === id);
+    const getStatus = (name) => {
+        const statuses = props.status.filter(s => s.device_id === name);
 
         // Currently only returns the first element, but it should return the most recent
         return statuses.length > 0 ? statuses[0].raw === "true" : null;
@@ -89,7 +89,7 @@ export default function LeftBar(props) {
                     borderTopRadius="1.7rem"
                     onClick={toggleCollapsed}
                 >
-                    {props.settings.title}
+                    {props.currentLot.title}
                 </Button>
                 <MenuList>
                     <MenuItem>Floor 1</MenuItem>

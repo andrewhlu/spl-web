@@ -10,50 +10,60 @@ import { fetch } from "../utils/fetch.js";
 import LeftBar from "../components/LeftBar.js";
 import { getSession } from "../utils/session";
 import LoginDrawer from "../components/LoginDrawer.js";
+import { getLots } from "./api/lots.js";
+import { getSpotsFromLot } from "./api/spots/[lot].js";
+import { serializeDocument } from "../utils/mongodb.js";
 
 export async function getServerSideProps(context) {
     const { origin } = absoluteUrl(context.req, 'localhost:3000');
     // const origin = "http://10.0.0.93:3000";
 
-    const settings = await fetch(`${origin}/api/settings`);
     const status = await fetch(`${origin}/api/status`);
-    const devices = await fetch(`${origin}/api/devices`);
 
     const session = await getSession(context.req, context.res);
+
+    const lots = await getLots();
+    console.log("Lot ID:", lots[0]._id);
+
+    const spots = await getSpotsFromLot(lots[0]._id);
+    console.log("Spots:", spots);
 
     return {
         props: {
             query: context.query,
-            settings: settings,
             status: status,
-            devices: devices,
-            session: session
+            session: session,
+            lots: serializeDocument(lots),
+            spots: serializeDocument(spots)
         }
     }
 }
 
 export default function Home(props) {
+    const [currentLot, setCurrentLot] = useState(props.lots[0]);
+    const [allLots, setAllLots] = useState(props.lots);
+    const [spots, setSpots] = useState(props.spots);
+
     const [selectedSpot, setSelectedSpot] = useState("");
     const [collapsed, setCollapsed] = useState(false);
-    const [spots, setSpots] = useState(props.settings.spots);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const mapDiv = useRef(null);
 
-    const getStatus = (id) => {
-        const statuses = props.status.filter(s => s.device_id === id);
+    const getStatus = (name) => {
+        const statuses = props.status.filter(s => s.device_id === name);
 
         // Currently only returns the first element, but it should return the most recent
         return statuses.length > 0 ? statuses[0].raw === "true" : null;
     }
 
     const generateMapIndicator = (spot) => {
-        const status = getStatus(spot.id);
+        const status = getStatus(spot.name);
         const color = status !== null ? status === true ? "red" : "teal" : "gray";
 
         return (
-            <Tooltip hasArrow label={spot.id} closeOnClick={false} key={spot.id}>
+            <Tooltip hasArrow label={spot.name} closeOnClick={false} key={spot.name}>
                 <Button colorScheme={color}
                     variant="solid" 
                     width="50px" 
@@ -65,8 +75,8 @@ export default function Home(props) {
                     left={`${spot.position[0] - 25}px`}
                     style={{ cursor: "pointer" }}
                     onClick={() => {
-                        console.log(`${spot.id} has been clicked`);
-                        setSelectedSpot(spot.id);
+                        console.log(`${spot.name} has been clicked`);
+                        setSelectedSpot(spot.name);
                         setCollapsed(false);
                     }}></Button>
             </Tooltip>
@@ -93,7 +103,7 @@ export default function Home(props) {
                         <Box w="100vw" h="100vh" bg="#dae6e6">
                             <Image
                                 ref={mapDiv}
-                                src={props.settings.floorplan}
+                                src={currentLot?.floorplan}
                                 alt="Parking Lot"
                                 pos="absolute"
                                 maxW="none"
@@ -110,11 +120,13 @@ export default function Home(props) {
                     top={{ lg: "0"}} 
                     bottom={{ base: "0"}}
                     p={{ base: "0", lg: "2rem" }}>
-                    <LeftBar settings={props.settings} 
+                    <LeftBar
                         status={props.status} 
-                        devices={props.devices} 
                         user={props.session?.user}
                         onOpen={onOpen}
+                        currentLot={currentLot}
+                        lots={allLots}
+                        spots={spots}
                         selectedSpot={selectedSpot}
                         collapsed={collapsed}
                         setCollapsed={setCollapsed}></LeftBar>
