@@ -5,36 +5,32 @@ import { Box } from "@chakra-ui/layout";
 import { Tooltip } from "@chakra-ui/tooltip";
 import { useEffect, useRef, useState } from 'react';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import absoluteUrl from 'next-absolute-url';
-import { fetch } from "../utils/fetch.js";
-import LeftBar from "../components/LeftBar.js";
+import { fetch } from "../utils/fetch";
+import LeftBar from "../components/LeftBar";
 import { getSession } from "../utils/session";
-import LoginDrawer from "../components/LoginDrawer.js";
-import { getLots } from "./api/lots.js";
-import { getSpotsFromLot } from "./api/spots/[lot].js";
-import { serializeDocument } from "../utils/mongodb.js";
+import LoginDrawer from "../components/LoginDrawer";
+import { getLots } from "./api/lots";
+import { getSpotsFromLot } from "./api/spots/[lot]";
+import { serializeDocument } from "../utils/mongodb";
+import { getLatestStatus } from "./api/status/[lot]";
 
 export async function getServerSideProps(context) {
-    const { origin } = absoluteUrl(context.req, 'localhost:3000');
-    // const origin = "http://10.0.0.93:3000";
-
-    const status = await fetch(`${origin}/api/status`);
-
     const session = await getSession(context.req, context.res);
 
     const lots = await getLots();
-    console.log("Lot ID:", lots[0]._id);
+    const lotId = lots[0]._id;
+    console.log("Lot ID:", lotId);
 
-    const spots = await getSpotsFromLot(lots[0]._id);
-    console.log("Spots:", spots);
+    const spots = await getSpotsFromLot(lotId);
+    const status = await getLatestStatus(lotId);
 
     return {
         props: {
             query: context.query,
-            status: status,
             session: session,
             lots: serializeDocument(lots),
-            spots: serializeDocument(spots)
+            spots: serializeDocument(spots),
+            status: serializeDocument(status),
         }
     }
 }
@@ -43,6 +39,7 @@ export default function Home(props) {
     const [currentLot, setCurrentLot] = useState(props.lots[0]);
     const [allLots, setAllLots] = useState(props.lots);
     const [spots, setSpots] = useState(props.spots);
+    const [availability, setAvailability] = useState(props.status);
 
     const [selectedSpot, setSelectedSpot] = useState("");
     const [collapsed, setCollapsed] = useState(false);
@@ -51,11 +48,33 @@ export default function Home(props) {
 
     const mapDiv = useRef(null);
 
-    const getStatus = (name) => {
-        const statuses = props.status.filter(s => s.device_id === name);
+    useEffect(() => {
+        let refreshTimer = setInterval(() => {
+            refreshAvailability();
+        },15000);
 
-        // Currently only returns the first element, but it should return the most recent
-        return statuses.length > 0 ? statuses[0].raw === "true" : null;
+        // Cleanup
+        return () => {
+            clearInterval(refreshTimer);
+        }
+    }, []);
+
+    const refreshAvailability = async () => {
+        const status = await fetch(`/api/status/${currentLot._id}`);
+
+        if (status.success) {
+            setAvailability(status.spots);
+        }
+    }
+
+    const getStatus = (name) => {
+        const status = availability.filter(s => s.name === name);
+
+        if (status.length === 0) {
+            return null;
+        }
+
+        return status[0].latest.occupied;
     }
 
     const generateMapIndicator = (spot) => {
@@ -129,7 +148,9 @@ export default function Home(props) {
                         spots={spots}
                         selectedSpot={selectedSpot}
                         collapsed={collapsed}
-                        setCollapsed={setCollapsed}></LeftBar>
+                        setCollapsed={setCollapsed}
+                        refresh={refreshAvailability}
+                    />
                 </Box>
             </Box>
         </>

@@ -4,17 +4,11 @@ import { Box } from "@chakra-ui/layout";
 import { Tooltip } from "@chakra-ui/tooltip";
 import { useEffect, useRef, useState } from 'react';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import absoluteUrl from 'next-absolute-url';
-import { fetch } from "../utils/fetch.js";
-import LeftBarEditor from "../components/LeftBarEditor.js";
+import { fetch } from "../utils/fetch";
+import LeftBarEditor from "../components/LeftBarEditor";
 import { getSession } from "../utils/session";
 
 export async function getServerSideProps(context) {
-    const { origin } = absoluteUrl(context.req, 'localhost:3000');
-    // const origin = "http://10.0.0.93:3000";
-
-    const status = await fetch(`${origin}/api/status`);
-
     const session = await getSession(context.req, context.res);
 
     if (!session.user?.admin) {
@@ -31,7 +25,6 @@ export async function getServerSideProps(context) {
     return {
         props: {
             query: context.query,
-            status: status,
             session: session
         }
     }
@@ -41,6 +34,7 @@ export default function Home(props) {
     const [currentLot, setCurrentLot] = useState(null);
     const [allLots, setAllLots] = useState([]);
     const [spots, setSpots] = useState([]);
+    const [availability, setAvailability] = useState([]);
 
     const mapDiv = useRef(null);
 
@@ -55,11 +49,14 @@ export default function Home(props) {
         getLots();
     }, []);
 
-    const getStatus = (id) => {
-        const statuses = props.status.filter(s => s.device_id === id);
+    const getStatus = (name) => {
+        const status = availability.filter(s => s.name === name);
 
-        // Currently only returns the first element, but it should return the most recent
-        return statuses.length > 0 ? statuses[0].raw === "true" : null;
+        if (status.length === 0) {
+            return null;
+        }
+
+        return status[0].latest.occupied;
     }
 
     const removeSpot = async (spot) => {
@@ -88,6 +85,12 @@ export default function Home(props) {
         const spotsResult = await fetch(`/api/spots/${lot._id}`);    
         if (spotsResult.success) {
             setSpots(spotsResult.spots);
+
+            // Get availability for current lot
+            const availResult = await fetch(`/api/status/${lot._id}`);    
+            if (availResult.success) {
+                setAvailability(availResult.spots);
+            }
         }
     }
 
@@ -141,13 +144,15 @@ export default function Home(props) {
             Math.floor((clickCoord.y - mapCoord.y) / mapDimensions.height * naturalDimensions.height)
         ];
 
+        const namePrefix = currentLot._id.substring(currentLot._id.length - 4);
+
         const options = {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                name: `new-${clickPosition[0]}-${clickPosition[1]}`,
+                name: `${namePrefix}-${clickPosition[0]}-${clickPosition[1]}`,
                 x: clickPosition[0],
                 y: clickPosition[1]
             })
