@@ -107,7 +107,7 @@ export default function LeftBar(props) {
                     {props.user ?
                         <>
                             <Text>You are currently not parked in any spot.</Text>
-                            <Button w="100%" my="0.5rem" onClick={props.refresh}>Find me a spot!</Button>
+                            <Button w="100%" my="0.5rem" onClick={props.findOpenSpot}>Find me a spot!</Button>
                             {/* <Text>Handicapped? Show handicapped spots first by toggling the option in Settings.</Text> */}
 
                             <Divider my="0.5rem" />

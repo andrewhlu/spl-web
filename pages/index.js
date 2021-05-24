@@ -77,6 +77,33 @@ export default function Home(props) {
         return status[0].latest.occupied;
     }
 
+    const findOpenSpot = () => {
+        const exit = currentLot.exit;
+        const openSpots = spots.filter(s => getStatus(s.name) === false);
+
+        let closest = {
+            distance: Infinity,
+            spot: null
+        };
+
+        openSpots.forEach(s => {
+            const distance = Math.sqrt(Math.pow(exit[0] - s.position[0], 2) + Math.pow(exit[1] - s.position[1], 2));
+            console.log(distance);
+
+            if (distance < closest.distance) {
+                closest = {
+                    distance: distance,
+                    spot: s
+                };
+            }
+        })
+
+        if (closest.spot) {
+            console.log(`${closest.spot.name} is the closest spot!`);
+            setSelectedSpot(closest.spot.name);
+        }
+    }
+
     const generateMapIndicator = (spot) => {
         const status = getStatus(spot.name);
         const color = status !== null ? status === true ? "red" : "teal" : "gray";
@@ -87,7 +114,7 @@ export default function Home(props) {
                     variant="solid" 
                     width="50px" 
                     height="50px" 
-                    border="3px solid black" 
+                    border={spot.name === selectedSpot ? "8px solid #FEBC11" : "3px solid black"}
                     borderRadius="25px" 
                     pos="absolute"
                     top={`${spot.position[1] - 25}px`} 
@@ -95,7 +122,6 @@ export default function Home(props) {
                     style={{ cursor: "pointer" }}
                     onClick={() => {
                         console.log(`${spot.name} has been clicked`);
-                        setSelectedSpot(spot.name);
                         setCollapsed(false);
                     }}></Button>
             </Tooltip>
@@ -149,7 +175,7 @@ export default function Home(props) {
                         selectedSpot={selectedSpot}
                         collapsed={collapsed}
                         setCollapsed={setCollapsed}
-                        refresh={refreshAvailability}
+                        findOpenSpot={findOpenSpot}
                     />
                 </Box>
             </Box>
