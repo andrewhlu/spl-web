@@ -41,7 +41,7 @@ export default function Home(props) {
     const [spots, setSpots] = useState(props.spots);
     const [availability, setAvailability] = useState(props.status);
 
-    const [selectedSpot, setSelectedSpot] = useState("");
+    const [selectedSpot, setSelectedSpot] = useState(null);
     const [collapsed, setCollapsed] = useState(false);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -135,6 +135,7 @@ export default function Home(props) {
             <Box height="100vh" bg="#dae6e6">
                 <TransformWrapper
                     defaultScale={0.3}
+                    defaultPositionY={-1000}
                     options={{
                         limitToBounds: false,
                         minScale: 0.15,
@@ -173,6 +174,7 @@ export default function Home(props) {
                         lots={allLots}
                         spots={spots}
                         selectedSpot={selectedSpot}
+                        setSelectedSpot={setSelectedSpot}
                         collapsed={collapsed}
                         setCollapsed={setCollapsed}
                         findOpenSpot={findOpenSpot}

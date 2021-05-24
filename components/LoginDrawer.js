@@ -29,7 +29,7 @@ export default function LoginDrawer(props) {
                     <Spacer />
                     
                     <Button w="100%" onClick={signinWithGoogle} my="0.5rem">Sign in with Google</Button>
-                    <Button w="100%" my="0.5rem" disabled>Sign in with UCSB NetID (coming soon)</Button>
+                    <Button w="100%" my="0.5rem">Sign in with UCSB NetID</Button>
 
                     <Spacer />
 

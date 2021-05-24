@@ -106,14 +106,18 @@ export default function LeftBar(props) {
 
                     {props.user ?
                         <>
-                            <Text>You are currently not parked in any spot.</Text>
-                            <Button w="100%" my="0.5rem" onClick={props.findOpenSpot}>Find me a spot!</Button>
-                            {/* <Text>Handicapped? Show handicapped spots first by toggling the option in Settings.</Text> */}
-
+                            {props.selectedSpot ?
+                                <>
+                                    <Text>We found a spot! We'll reserve this spot for you for the next 5 minutes.</Text>
+                                    <Button w="100%" my="0.5rem" onClick={() => props.setSelectedSpot(null)}>Cancel</Button>
+                                </>
+                            :
+                                <>
+                                    <Text>You are currently not parked in any spot.</Text>
+                                    <Button w="100%" my="0.5rem" onClick={props.findOpenSpot}>Find me a spot!</Button>
+                                </>
+                            }
                             <Divider my="0.5rem" />
-
-                            {/* <Heading size="sm" py="0.5rem">History</Heading>
-                            <Text>You have never parked in this parking lot.</Text> */}
                         </>
                     :
                         <>
