@@ -13,6 +13,7 @@ import { getLots } from "./api/lots";
 import { getSpotsFromLot } from "./api/spots/[lot]";
 import { serializeDocument } from "../utils/mongodb";
 import { getLatestStatus } from "./api/status/[lot]";
+import { addSpotToUser } from "../utils/user";
 
 export async function getServerSideProps(context) {
     const session = await getSession(context.req, context.res);
@@ -77,7 +78,7 @@ export default function Home(props) {
         return status[0].latest.occupied;
     }
 
-    const findOpenSpot = () => {
+    const findOpenSpot = async () => {
         const exit = currentLot.exit;
         const openSpots = spots.filter(s => getStatus(s.name) === false);
 
@@ -88,7 +89,6 @@ export default function Home(props) {
 
         openSpots.forEach(s => {
             const distance = Math.sqrt(Math.pow(exit[0] - s.position[0], 2) + Math.pow(exit[1] - s.position[1], 2));
-            console.log(distance);
 
             if (distance < closest.distance) {
                 closest = {
@@ -101,6 +101,7 @@ export default function Home(props) {
         if (closest.spot) {
             console.log(`${closest.spot.name} is the closest spot!`);
             setSelectedSpot(closest.spot.name);
+            await addSpotToUser(closest.spot.name, props.session.user._id);
         }
     }
 

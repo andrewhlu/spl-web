@@ -59,3 +59,18 @@ export async function getUserFromGoogleId(googleId) {
         }
     });
 }
+
+export async function addSpotToUser(spot, uid) {
+    const client = await initDatabase();
+    const users = client.collection("users");
+
+    const update = {
+        $set: {
+            spot: spot
+        }
+    };
+
+    return users.updateOne({
+        _id: ObjectId(uid)
+    }, update);
+}
