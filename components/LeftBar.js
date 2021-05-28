@@ -9,13 +9,6 @@ import User from "./User";
 export default function LeftBar(props) {
     const router = useRouter();
 
-    const getStatus = (name) => {
-        const statuses = props.status.filter(s => s.device_id === name);
-
-        // Currently only returns the first element, but it should return the most recent
-        return statuses.length > 0 ? statuses[0].raw === "true" : null;
-    }
-
     const toggleCollapsed = () => {
         props.setCollapsed(!props.collapsed);
     }
@@ -107,10 +100,15 @@ export default function LeftBar(props) {
                     {props.user ?
                         <>
                             {props.selectedSpot ?
-                                <>
-                                    <Text>We found a spot! We'll reserve this spot for you for the next 5 minutes.</Text>
-                                    <Button w="100%" my="0.5rem" onClick={() => props.setSelectedSpot(null)}>Cancel</Button>
-                                </>
+                                props.getStatus(props.selectedSpot) ?
+                                    <>
+                                        <Text>You are currently parked in spot {props.selectedSpot}. Stay as long as you'd like!</Text>
+                                    </>
+                                :
+                                    <>
+                                        <Text>We found a spot! We'll reserve this spot for you for the next 5 minutes.</Text>
+                                        <Button w="100%" my="0.5rem" onClick={() => props.setSelectedSpot(null)}>Cancel</Button>
+                                    </>
                             :
                                 <>
                                     <Text>You are currently not parked in any spot.</Text>

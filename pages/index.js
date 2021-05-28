@@ -13,7 +13,6 @@ import { getLots } from "./api/lots";
 import { getSpotsFromLot } from "./api/spots/[lot]";
 import { serializeDocument } from "../utils/mongodb";
 import { getLatestStatus } from "./api/status/[lot]";
-import { addSpotToUser } from "../utils/user";
 
 export async function getServerSideProps(context) {
     const session = await getSession(context.req, context.res);
@@ -42,7 +41,7 @@ export default function Home(props) {
     const [spots, setSpots] = useState(props.spots);
     const [availability, setAvailability] = useState(props.status);
 
-    const [selectedSpot, setSelectedSpot] = useState(null);
+    const [selectedSpot, setSelectedSpot] = useState(props.session?.user?.spot);
     const [collapsed, setCollapsed] = useState(false);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -100,8 +99,23 @@ export default function Home(props) {
 
         if (closest.spot) {
             console.log(`${closest.spot.name} is the closest spot!`);
-            setSelectedSpot(closest.spot.name);
-            await addSpotToUser(closest.spot.name, props.session.user._id);
+
+            const options = {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    spot: closest.spot.name
+                })
+            };
+    
+
+            const response = await fetch(`/api/park`, options);
+
+            if (response.success) {
+                setSelectedSpot(closest.spot.name);
+            }
         }
     }
 
@@ -156,6 +170,16 @@ export default function Home(props) {
                                 maxW="none"
                                 style={{ pointerEvents: "auto !important" }}
                             />
+                            {selectedSpot && !getStatus(selectedSpot) &&
+                                <Image 
+                                    src="/arrow.png"
+                                    pos="absolute"
+                                    w="1400px"
+                                    maxW="none"
+                                    top="4620"
+                                    left="830"
+                                />
+                            }
                             {spots.map(spot => generateMapIndicator(spot))}
                         </Box>
                     </TransformComponent>
@@ -174,6 +198,7 @@ export default function Home(props) {
                         currentLot={currentLot}
                         lots={allLots}
                         spots={spots}
+                        getStatus={getStatus}
                         selectedSpot={selectedSpot}
                         setSelectedSpot={setSelectedSpot}
                         collapsed={collapsed}
