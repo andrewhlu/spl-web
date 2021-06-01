@@ -61,7 +61,7 @@ function MyApp({ Component, pageProps }) {
                 <link
                     rel="apple-touch-startup-image"
                     media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
-                    href="/api/splash/1125/2436.png"
+                    href="/splash_2436x1125.png"
                 />
                 <link
                     rel="apple-touch-startup-image"
